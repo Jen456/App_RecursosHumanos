@@ -38,6 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts.apps.AccountsConfig', #para agregar otros usuarios
+    
+    #para la verificacion de dos pasos ... 
+    'django_otp',
+    'django_otp.plugins.otp_static',
+    'django_otp.plugins.otp_totp',
+    'two_factor',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +54,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    #para la autentificacion de dos pasos 
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django_otp.middleware.OTPMiddleware',
+    # Include for twilio gateway
+    'two_factor.middleware.threadlocals.ThreadLocals',
+
 ]
 
 ROOT_URLCONF = 'my_project.urls'
@@ -73,7 +85,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'my_project.wsgi.application'
 
-LOGIN_REDIRECT_URL = '/'
+#---------------------------------------------------------------------#
+
+#Señala las nuevas páginas de inicio de sesión
+LOGIN_URL = 'two_factor:login'
+
+LOGIN_REDIRECT_URL = 'two_factor:profile'
+#---------------------------------------------------------------------#
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
@@ -103,7 +121,22 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'two_factor': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        }
+    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
